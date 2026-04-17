@@ -510,4 +510,4 @@ end
 ---
 
 *Generated as part of the VLSI Interview Preparation Repository.*  
-*Module 2 → Coming Next: Combinational Logic Design, Timing Analysis & Setup/Hold.*
+*Module 2 → Silicon Real Estate — IPs & Technology Nodes*

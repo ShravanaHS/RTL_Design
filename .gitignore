@@ -1,0 +1,25 @@
+# Vivado / Xilinx project artifacts
+projects/**/*.cache/
+projects/**/*.hw/
+projects/**/*.ip_user_files/
+projects/**/*.sim/
+projects/**/*.runs/
+projects/**/*.gen/
+projects/**/*.jou
+projects/**/*.log
+projects/**/*.str
+projects/**/*.bat
+projects/**/*.pb
+projects/**/*.wdb
+projects/**/*.wcfg
+*.wdf
+
+# Keep source files
+!projects/**/sources_1/**/*.v
+!projects/**/sources_1/**/*.sv
+!projects/**/sources_1/**/*.vhd
+!projects/**/*.xpr
+
+# OS artifacts
+.DS_Store
+Thumbs.db

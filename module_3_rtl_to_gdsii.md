@@ -1,4 +1,4 @@
-# Module 4: The RTL-to-GDSII Toolchain & Full Adder Case Study
+# Module 3: The RTL-to-GDSII Toolchain & Full Adder Case Study
 
 > **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
 > **Author:** Shravana HS  
@@ -14,7 +14,7 @@
 3. [The Analog/Custom EDA Toolchain](#3-the-analogcustom-eda-toolchain)
 4. [Physical Signoff: DRC & LVS](#4-physical-signoff-drc--lvs)
 5. [The Complete Open-Source Flow — Mermaid Diagram](#5-the-complete-open-source-flow--mermaid-diagram)
-6. [Sub-section 4.1: Case Study — 1-Bit Full Adder Through the Digital Flow](#sub-section-41-case-study--1-bit-full-adder-through-the-digital-flow)
+6. [Sub-section 3.1: Case Study — 1-Bit Full Adder Through the Digital Flow](#sub-section-31-case-study--1-bit-full-adder-through-the-digital-flow)
 7. [Summary Cheat Sheet](#summary-cheat-sheet)
 
 ---
@@ -304,7 +304,7 @@ flowchart TD
 
 ---
 
-## Sub-section 4.1: Case Study — 1-Bit Full Adder Through the Digital Flow
+## Sub-section 3.1: Case Study — 1-Bit Full Adder Through the Digital Flow
 
 A 1-bit Full Adder is the quintessential building block of every arithmetic unit in every processor. It computes the sum and carry of three 1-bit inputs: A, B, and Cin (carry in).
 
@@ -338,6 +338,19 @@ Boolean Equations:
 // Written at the dataflow level for clarity and synthesis
 // compatibility. No synthesizer-unfriendly constructs.
 // ============================================================
+module fulladder (
+    input  wire a,    // Input operand A
+    input  wire b,    // Input operand B
+    input  wire cin,  // Carry input from previous stage
+    output wire sum,  // Sum output: A XOR B XOR Cin
+    output wire cout  // Carry output: majority function
+);
+    // Dataflow-level continuous assignments
+    // Synthesizer will map these XOR/AND/OR operations
+    // to the closest matching standard cells in the PDK library.
+    assign sum  = a ^ b ^ cin;
+    assign cout = (a & b) | (b & cin) | (a & cin);
+
 module fulladder (
     input  wire a,    // Input operand A
     input  wire b,    // Input operand B
@@ -632,4 +645,4 @@ Cout path: a,b,cin → MAJ3 → cout
 
 ---
 
-*Repository continues: Module 5 → Combinational Logic, Timing Analysis & Setup/Hold Violations*
+*Module 4 onwards → Verilog Module Anatomy, Keywords & Verification, Design Methodologies*
