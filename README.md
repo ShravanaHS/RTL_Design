@@ -21,42 +21,20 @@
 * **Physical Signoff:** DRC (Design Rule Check) & LVS (Layout vs. Schematic).
 * **Case Study:** 1-bit Full Adder traced from RTL → GDSII geometry.
 
-### [Module 5: The Anatomy of a Verilog Module & Instantiation](./module_5_module_anatomy.md)
-* **Comments:** Single-line (`//`) vs. Block (`/* */`) and the non-nesting catastrophe trap.
-* **ANSI-Style Module Declaration:** Parameterized, inline port direction — the modern standard.
-* **Positional vs. Named Port Mapping:** Why `.port(signal)` named mapping is the only industrial standard.
-* **Module Hierarchy:** How the instantiation tree maps directly to the physical floorplan.
+### [Module 5: Verilog Fundamentals — Module Anatomy, Keywords, Verification & Synthesis](./module_5_verilog_fundamentals.md)
+* **Part A: Module Anatomy & Instantiation:** ANSI-style declarations, Port mapping (Positional vs. Named), Hierarchy principles.
+* **Part B: Keywords & Verification:** Reserved lowercase lexicon, Event-driven simulation engine, Testbench anatomy, and the non-synthesizable `initial` block.
+* **Part C: Design Methodologies & Synthesis:** Translation vs. Optimization vs. Mapping phases, Top-Down/Bottom-Up/Meet-in-the-Middle workflows.
+* **Silicon Realities:** Why `#delay` is ignored in synthesis and how `reg` doesn't always equal a flip-flop.
 
-### [Module 6: Keywords & Verification Fundamentals](./module_6_keywords_verification.md)
-* **Keywords:** All reserved — strictly lowercase. Verilog is fully case-sensitive.
-* **Event-Driven Simulation Engine:** How the simulator's event queue and NBC scheduling regions work.
-* **Abstract Time (`#delay`):** A simulation-only construct — completely ignored by the synthesizer.
-* **The Testbench:** A closed universe (no ports), DUT inputs are `reg`, outputs are `wire`.
-* **`initial` Block:** One-shot simulation stimulus — not synthesizable in ASIC flows.
-
-### [Module 7: Design Methodologies & Advanced Synthesis](./module_7_methodologies_synthesis.md)
-* **Synthesis Phases:** Translation → Optimization (ruthless dead-code elimination) → Technology Mapping.
-* **Top-Down:** SoC spec → RTL → Gates. Architecture-driven with late physical feedback.
-* **Bottom-Up:** PDK cells → Functional blocks → System. Implementation-driven.
-* **Meet-in-the-Middle:** The real-world standard — Top-Down RTL converges with Bottom-Up constraints via iterative ECOs.
-* **Mermaid Diagram:** Full Top-Down / Bottom-Up / Meet-in-the-Middle methodology flowchart.
-
----
-
-## 📖 Reference Guides
-
-### [Lexical Elements & Data Types — The Grammar of Silicon](./lexical_elements.md)
-A standalone masterclass reference covering the fundamental grammar, syntax, and data types of Verilog. Designed for rapid pre-interview review.
-* **Comments:** Intent over description. Block comment non-nesting trap. `` `ifdef `` safe disable pattern.
-* **Identifiers:** Naming rules, case-sensitivity trap, escaped identifiers in synthesis netlists.
-* **Keywords:** Reserved lexicon categories. `reg` misconception — it is NOT a flip-flop keyword.
-* **Ports:** Direction-to-type mapping. Driving an input trap. `inout` tri-state buffer syntax.
-* **Number Literals:** 4-logic states (`0`,`1`,`X`,`Z`). Unsized bloat (32-bit default). Silent truncation/extension.
-* **Data Types:** Nets (`wire`, `wand`, `wor`) vs. Variables (`reg`). Multiple-driver contention. Signed/Unsigned mixing.
-* **`integer` & `real`:** Loop counter vs. datapath use. Why `real` is unsynthesizable — Fixed-Point alternative.
-* **Vectors vs. Arrays:** Bus (`[N:0] name`) vs. Memory (`name [depth]`). Illegal whole-array assignment.
-* **Strings:** ASCII storage in `reg` vectors. Silent truncation and null-padding traps.
-* **Special Characters:** `#`, `@`, `$`, `` ` ``, `?:`. Concatenation/Replication operators. Sign extension hack. `$time` rounding error.
+### [Module 6: The Grammar of Silicon — Lexical Elements & Data Types](./lexical_elements.md)
+A standalone masterclass reference covering the fundamental grammar, syntax, and data types of Verilog for rapid pre-interview review.
+* **Comments & Identifiers:** Intent over description, non-nesting traps, and synthesis-escaped names.
+* **Data Types:** Nets (`wire`, `wand`, `wor`) vs. Variables (`reg`), and the multiple-driver `X` contention.
+* **Number Representation:** 4-logic states, unsized literal bloat, and silent truncation/extension traps.
+* **Advanced Types:** Why `real` is unsynthesizable and how fixed-point arithmetic solves it in hardware.
+* **Vectors vs. Arrays:** Bus syntax vs. Memory depth and the standard Verilog array assignment limitation.
+* **Sign Extension & Time:** Sign-extension hacks using replication, and the `$time` rounding/precision minefield.
 
 
 ## 🚀 Repository Goals
