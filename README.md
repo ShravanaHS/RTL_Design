@@ -1,6 +1,4 @@
-# RTL Design & VLSI Interview Preparation
 
-Welcome to my comprehensive repository for RTL design concepts, Verilog fundamentals, and VLSI interview preparation. This repository is structured into modules covering everything from basic digital design to advanced verification and synthesis.
 
 ## 📚 Modules
 
@@ -37,29 +35,3 @@ Welcome to my comprehensive repository for RTL design concepts, Verilog fundamen
 - **Hardware Realities:** Focusing on synthesis and silicon behavior rather than just simulation.
 - **Portfolio:** Showcasing clean, documented, and professional RTL code.
 
-## 🛠️ Tools & Technologies
-
-### Verification
-- **Languages:** Verilog (IEEE 1364), SystemVerilog (IEEE 1800)
-- **Simulation:** `iverilog` (Icarus Verilog), `gtkwave` (Waveform Viewer)
-- **Industry Simulators:** ModelSim/Questasim, Synopsys VCS, Cadence Xcelium
-
-### Digital Synthesis & Physical Design (Open-Source)
-- **Synthesis:** `yosys` (with ABC back-end, SkyWater SKY130 PDK)
-- **Place & Route:** `OpenROAD` (Floorplan, CTS, Routing, STA)
-- **Layout & DRC:** `Magic`
-- **LVS:** `netgen`
-
-### Analog & Custom Design (Open-Source)
-- **Schematic:** `xschem`
-- **SPICE Simulation:** `ngspice`
-- **Layout:** `Magic` (open-source), Cadence `Virtuoso` (industry)
-
-### Industry EDA
-- **Synthesis:** Synopsys Design Compiler, Cadence Genus
-- **P&R:** Cadence Innovus, Synopsys IC Compiler 2
-- **Signoff:** Mentor/Siemens Calibre (DRC/LVS), Synopsys PrimeTime (STA)
-- **Visualization:** GTKWave, Cadence Verdi, Mermaid.js
-
----
-Created and maintained by [Shravana HS](https://github.com/ShravanaHS).
