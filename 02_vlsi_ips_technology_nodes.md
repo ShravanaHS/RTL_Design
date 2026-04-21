@@ -1,9 +1,5 @@
 # Module 2: Silicon Real Estate — IPs & Technology Nodes
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364 / IEEE 1800 (SystemVerilog) & Process Technology  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -544,6 +540,3 @@ flowchart LR
 | **Planar → FinFET** | 3-sided gate control; lower leakage; introduced at 22nm (Intel). |
 | **FinFET → GAAFET** | 4-sided gate control; required at 3nm and below for continuous sizing. |
 
----
-
-*Module 3 → The RTL-to-GDSII Toolchain & Full Adder Case Study*

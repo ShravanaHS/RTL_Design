@@ -1,9 +1,5 @@
 # Module 3: The RTL-to-GDSII Toolchain & Full Adder Case Study
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** Open-Source EDA (SkyWater SKY130 PDK)  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -643,6 +639,3 @@ Cout path: a,b,cin → MAJ3 → cout
 >
 > **The rule:** Final timing sign-off is always done **post-route**, with parasitic extraction from the actual GDSII geometry. Synthesis timing is a guide, not a guarantee.
 
----
-
-*Module 4 onwards → Verilog Module Anatomy, Keywords & Verification, Design Methodologies*

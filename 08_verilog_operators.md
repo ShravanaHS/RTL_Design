@@ -1,9 +1,5 @@
 # Silicon Math: The 10 Verilog Operator Families
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364-2001 (Verilog-2001)  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 

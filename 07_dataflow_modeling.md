@@ -1,9 +1,5 @@
 # Dataflow Modeling: Continuous Assignments & Boolean Equations
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364-2001 (Verilog-2001)  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -1054,9 +1050,3 @@ assign y = x > 0.5 ? a : b;     // real type is NOT synthesizable
 4. **Synthesis ignores `#`**: All `assign #delay` specifications are stripped in synthesis. Use SDC.
 5. **Ternary is your MUX**: `sel ? a : b` is the idiomatic, synthesis-friendly way to write any multiplexer in dataflow style.
 
----
-
-*Document authored for: RTL Design Interview Preparation Repository*  
-*Standard: IEEE 1364-2001 (Verilog-2001)*  
-*Prerequisite: Module 6 — Lexical Elements & Data Types | Gate-Level Modeling*  
-*Follow-on reading: Behavioral Modeling — `always` Blocks & Sequential Logic*

@@ -1,7 +1,5 @@
 # Module 6: The Grammar of Silicon — Lexical Elements & Data Types
 
-> **Module Level:** Advanced Reference | **Prerequisite:** Module 5 — Verilog Fundamentals  
-> **Purpose:** A circuit-accurate, interview-hardened deep dive into Verilog's foundational grammar, syntax rules, and data type system. Every section ends with curated `🔥 Interview Trap` callouts sourced from real silicon design failures.
 
 ---
 
@@ -1042,8 +1040,3 @@ The replication operator `{N{expr}}` repeats an expression N times and concatena
 | **Strings** | No string type; ASCII in `reg` (8 bits/char) | Too-small reg truncates left; too-large pads with `8'h00` |
 | **Time** | Use `$realtime` for precision; match `` `timescale `` carefully | `$time` rounds; `1ns/1ns` timescale hides sub-ns violations |
 
----
-
-*Document authored for: RTL Design Interview Preparation Repository*  
-*Standard: IEEE 1364-2001 (Verilog-2001) | Synthesis target: ASIC/FPGA*  
-*Follow-on reading: Module 5 — Verilog Fundamentals (Module Anatomy, Keywords, Verification & Synthesis)*

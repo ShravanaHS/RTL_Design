@@ -1,45 +1,71 @@
+# RTL Design — VLSI & Digital Design Interview Preparation
 
+A structured, technically rigorous reference for VLSI and Digital Design interviews.
+Every module focuses on **silicon behavior**, **synthesis realities**, and **interview traps** — not textbook theory.
+
+---
+
+## 📁 Repository Structure
+
+```
+RTL_Design/
+├── 01_vlsi_fundamentals.md
+├── 02_vlsi_ips_technology_nodes.md
+├── 03_rtl_to_gdsii_flow.md
+├── 04_lexical_elements_data_types.md
+├── 05_verilog_module_anatomy.md
+├── 06_gate_level_modeling.md
+├── 07_dataflow_modeling.md
+├── 08_verilog_operators.md
+├── 09_structural_modeling.md
+└── projects/
+    ├── full_adder/
+    ├── decodertree/
+    ├── mux4x1/
+    ├── muxytree/
+    ├── operators/
+    ├── project_2/
+    └── project_3/
+```
+
+---
 
 ## 📚 Modules
 
-### [Module 1: The Silicon Paradigm & Verilog Fundamentals](./module_1_fundamentals.md)
-* **The Hardware vs. Software Paradigm Shift**
-* **Verilog Basics:** `wire` vs. `reg` and physical synthesis reality.
-* **Levels of Abstraction:** Behavioral, Dataflow, Structural, and Switch level.
-* **Sequential Logic:** Synchronous vs. Asynchronous resets, and D-Flip Flop implementation.
-* **The VLSI Design Flow & Front-End Tools**
+| # | File | Topic |
+|:---:|---|---|
+| 01 | [01_vlsi_fundamentals.md](./01_vlsi_fundamentals.md) | The Silicon Paradigm & Verilog Fundamentals |
+| 02 | [02_vlsi_ips_technology_nodes.md](./02_vlsi_ips_technology_nodes.md) | Silicon Real Estate — IPs & Technology Nodes |
+| 03 | [03_rtl_to_gdsii_flow.md](./03_rtl_to_gdsii_flow.md) | The RTL-to-GDSII Toolchain & Full Adder Case Study |
+| 04 | [04_lexical_elements_data_types.md](./04_lexical_elements_data_types.md) | Lexical Elements & Data Types |
+| 05 | [05_verilog_module_anatomy.md](./05_verilog_module_anatomy.md) | Verilog Module Anatomy, Keywords & Synthesis |
+| 06 | [06_gate_level_modeling.md](./06_gate_level_modeling.md) | Gate-Level Modeling & Primitives |
+| 07 | [07_dataflow_modeling.md](./07_dataflow_modeling.md) | Dataflow Modeling — Continuous Assignments |
+| 08 | [08_verilog_operators.md](./08_verilog_operators.md) | The 10 Verilog Operator Families |
+| 09 | [09_structural_modeling.md](./09_structural_modeling.md) | Structural Modeling — The Silicon Schematic |
 
-### [Module 2: Silicon Real Estate — IPs & Technology Nodes](./module_2_vlsi_ips.md)
-* **VLSI IPs:** Soft, Firm, and Hard IP blocks + VIP (Verification IP) deep dive.
-* **Technology Nodes:** What they are vs. the modern marketing label ("The 3nm Lie").
-* **Scaling Laws:** Moore's Law vs. Dennard Scaling and the leakage power crisis.
-* **Transistor Evolution:** Planar MOSFET → FinFET → GAAFET/Nanosheet architecture.
+---
 
-### [Module 3: The RTL-to-GDSII Toolchain & Full Adder Case Study](./module_3_rtl_to_gdsii.md)
-* **Automated Digital Flow vs. Custom Analog Flow** — tool mapping and philosophy.
-* **Open-Source EDA Stack:** `iverilog`, `gtkwave`, `yosys`, `OpenROAD`, `xschem`, `ngspice`, `Magic`, `netgen`.
-* **Physical Signoff:** DRC (Design Rule Check) & LVS (Layout vs. Schematic).
-* **Case Study:** 1-bit Full Adder traced from RTL → GDSII geometry.
+## 🔬 Vivado Lab Projects
 
-### [Module 5: Verilog Fundamentals — Module Anatomy, Keywords, Verification & Synthesis](./module_5_verilog_fundamentals.md)
-* **Part A: Module Anatomy & Instantiation:** ANSI-style declarations, Port mapping (Positional vs. Named), Hierarchy principles.
-* **Part B: Keywords & Verification:** Reserved lowercase lexicon, Event-driven simulation engine, Testbench anatomy, and the non-synthesizable `initial` block.
-* **Part C: Design Methodologies & Synthesis:** Translation vs. Optimization vs. Mapping phases, Top-Down/Bottom-Up/Meet-in-the-Middle workflows.
-* **Silicon Realities:** Why `#delay` is ignored in synthesis and how `reg` doesn't always equal a flip-flop.
+| Project | Description |
+|---|---|
+| `projects/full_adder/` | 1-bit Full Adder — RTL, synthesis & simulation |
+| `projects/decodertree/` | 2-to-4 and 3-to-8 Decoder tree |
+| `projects/mux4x1/` | 4:1 MUX — behavioral, dataflow & structural variants |
+| `projects/muxytree/` | 4:1 MUX using structural 2:1 MUX tree + testbench |
+| `projects/operators/` | Ternary operator synthesis demonstration |
+| `projects/project_2/` | 2:1 MUX with testbench |
+| `projects/project_3/` | 4:1 MUX composed of 2:1 MUX modules |
 
-### [Module 6: The Grammar of Silicon — Lexical Elements & Data Types](./lexical_elements.md)
-A standalone masterclass reference covering the fundamental grammar, syntax, and data types of Verilog for rapid pre-interview review.
-* **Comments & Identifiers:** Intent over description, non-nesting traps, and synthesis-escaped names.
-* **Data Types:** Nets (`wire`, `wand`, `wor`) vs. Variables (`reg`), and the multiple-driver `X` contention.
-* **Number Representation:** 4-logic states, unsized literal bloat, and silent truncation/extension traps.
-* **Advanced Types:** Why `real` is unsynthesizable and how fixed-point arithmetic solves it in hardware.
-* **Vectors vs. Arrays:** Bus syntax vs. Memory depth and the standard Verilog array assignment limitation.
-* **Sign Extension & Time:** Sign-extension hacks using replication, and the `$time` rounding/precision minefield.
+---
 
+## 🧠 Key Technical Standards
 
-## 🚀 Repository Goals
-
-- **Conceptual Revision:** A reference for last-minute interview preparation.
-- **Hardware Realities:** Focusing on synthesis and silicon behavior rather than just simulation.
-- **Portfolio:** Showcasing clean, documented, and professional RTL code.
-
+| Standard | Scope |
+|---|---|
+| IEEE 1364-2001 (Verilog-2001) | All RTL code in this repository |
+| `u_` prefix | Module instances |
+| `w_` prefix | Internal routing wires |
+| `g_` prefix | Gate primitive instances |
+| Named port mapping | Mandatory for all module instantiations |

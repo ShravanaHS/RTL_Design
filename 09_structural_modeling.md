@@ -1,9 +1,5 @@
 # Structural Modeling in Verilog: The Silicon Schematic
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364-2001 (Verilog-2001)  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -640,52 +636,3 @@ Fix: Use `default_nettype none at the top of every file.
 | Implicit wire declaration | 1-bit wire silently created | `` `default_nettype none `` |
 | Positional port mapping | Silent miswiring on port reorder | Always use `.port(wire)` named mapping |
 
----
-
-## 📋 Claude Meta-Prompt for VLSI Content Generation
-
-Since Claude responds extremely well to XML tags and explicit constraint matrices, here is the master prompt to generate world-class VLSI content for this repository:
-
-```xml
-<role>
-Act as a Principal ASIC Verification Engineer and Technical Interview Architect
-at a Tier-1 semiconductor company. You are mentoring a junior engineer preparing
-for GATE/IISc exams and FAANG hardware interviews.
-</role>
-
-<task>
-Generate a comprehensive GitHub README module on the topic of:
-[INSERT TOPIC HERE — e.g., Clock Domain Crossing / Sequential Logic / FSMs]
-</task>
-
-<constraints>
-1. Depth: Do not write surface-level textbook definitions. Focus on physical
-   silicon implications, synthesis behaviors, and timing/simulation realities.
-2. Code Standards: Use strictly Verilog-2001 (ANSI style). Prefix instances
-   with `u_` and internal wires with `w_`.
-3. Formatting: Use Markdown with clear hierarchy, bold emphasis for keywords,
-   and code blocks for all Verilog examples.
-4. Masterclass Section: MUST conclude with 3 PYQs (Previous Year Questions /
-   Interview Traps) using the strict format below.
-</constraints>
-
-<pyq_format>
-For each PYQ in the masterclass section, use this exact structure:
-- <Snippet>   : Verilog code block demonstrating the trap.
-- <Question>  : What the interviewer asks.
-- <Trap>      : The incorrect assumption candidates make.
-- <Reality>   : The exact IEEE standard rule or hardware physics that applies.
-- <Result>    : The final output or error.
-</pyq_format>
-
-Execute with a ruthless, highly technical, and analytical tone.
-No fluff. No definitions that a textbook already covers.
-Focus purely on what breaks silicon and why.
-```
-
----
-
-*Document authored for: RTL Design Interview Preparation Repository*  
-*Standard: IEEE 1364-2001 (Verilog-2001)*  
-*Prerequisite: Dataflow Modeling — Continuous Assignments & Boolean Equations*  
-*Follow-on reading: Behavioral Modeling — `always` Blocks, Sequential Logic & FSMs*

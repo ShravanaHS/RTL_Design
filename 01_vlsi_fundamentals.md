@@ -1,9 +1,5 @@
 # Module 1: The Silicon Paradigm & Verilog Fundamentals
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364 / IEEE 1800 (SystemVerilog)  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -507,7 +503,3 @@ end
 | Behavioral > Structural | RTL is written Behaviorally/Dataflow. Chips are assembled Structurally. Switch level = transistor design. |
 | Verilog vs. VHDL | Verilog: commercial semiconductor, loosely typed. VHDL: aerospace/defense, strongly typed. |
 
----
-
-*Generated as part of the VLSI Interview Preparation Repository.*  
-*Module 2 → Silicon Real Estate — IPs & Technology Nodes*

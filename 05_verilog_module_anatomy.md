@@ -1,9 +1,5 @@
 # Module 5: Verilog Fundamentals — Module Anatomy, Keywords, Verification & Synthesis
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364-2005 / IEEE 1800-2017 (SystemVerilog) / Synopsys DC / Cadence Genus  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -950,6 +946,3 @@ set_max_fanout 16 [current_design] ; # Cap fanout at 16 loads per net
 | **SDC** | The mandatory timing constraint file. Without it, synthesis is untargeted. |
 | **ECO** | Engineering Change Order — the inevitable RTL fix triggered by physical implementation feedback. |
 
----
-
-*Module 6 → The Grammar of Silicon: Lexical Elements & Data Types*

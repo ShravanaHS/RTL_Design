@@ -1,9 +1,5 @@
 # Silicon Wiring: Advanced Gate-Level Modeling & Primitives
 
-> **Repository:** VLSI & Digital Design — Interview Preparation & Conceptual Reference  
-> **Author:** Shravana HS  
-> **Standard:** IEEE 1364-2001 (Verilog-2001) / IEEE 1364-2005  
-> **Status:** 🟢 Active — Last Reviewed April 2026
 
 ---
 
@@ -1489,9 +1485,3 @@ or  u_or  (out, w1, w2);    // out = ~a | (a & b)
 4. **Gate delays are inertial by default** — narrow glitches shorter than `Tp` are absorbed.
 5. **UDPs cannot use `Z` anywhere** — only `{0, 1, X}` in table entries.
 
----
-
-*Document authored for: RTL Design Interview Preparation Repository*  
-*Standard: IEEE 1364-2001 (Verilog-2001)*  
-*Prerequisite: Module 6 — Lexical Elements & Data Types*  
-*Follow-on reading: Combinational Logic, Karnaugh Maps & Critical Path Analysis*
