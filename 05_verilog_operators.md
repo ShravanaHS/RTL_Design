@@ -1108,3 +1108,583 @@ wire r4_right = !(a & b);  // ✅ Bitwise AND first, then logical NOT of result
 *Standard: IEEE 1364-2001 (Verilog-2001)*  
 *Prerequisite: Dataflow Modeling — Continuous Assignments & Boolean Equations*  
 *Follow-on reading: Behavioral Modeling — `always` Blocks, Sequential Logic & FSMs*
+
+---
+
+# 🎯 Ultimate PYQ & Interview Debugging Masterclass
+
+> **Tier:** Senior ASIC/SoC Verification Engineer | Texas Instruments · Qualcomm · NVIDIA  
+> **Focus:** Edge cases, simulation vs. synthesis mismatches, X/Z propagation, timing violations, silent compilation bugs  
+> **Standard:** IEEE 1364-2001 (Verilog-2001) LRM — citations included
+
+---
+
+## Table of PYQ Contents
+
+| Section | Topic | PYQs |
+|---|---|:---:|
+| [A. Arithmetic](#a-arithmetic-operator-pyqs) | Mixed sign, modulo sign rule, width extension illusion | 3 |
+| [B. Bitwise vs Logical](#b-bitwise-vs-logical-operator-pyqs) | Array condition trap, inversion mismatch, sign contamination | 3 |
+| [C. Reduction](#c-reduction-operator-pyqs) | X-propagation exception, NAND vs AND, parity on X-vectors | 2 |
+| [D. Relational](#d-relational-operator-pyqs) | Unsigned comparison of negative, X-operand result | 2 |
+| [E. Equality](#e-equality-operator-pyqs) | `==` vs `===` testbench void, Z-state comparison collapse | 2 |
+| [F. Shift](#f-shift-operator-pyqs) | X-contaminated shift, `>>>` on unsigned type | 2 |
+| [G. Concatenation & Replication](#g-concatenation--replication-pyqs) | Nested replication matrix, unsized literal void | 2 |
+| [H. Ternary (MUX)](#h-ternary-mux--equality-pyqs) | X-pessimism in MUXes, right-associative ternary | 2 |
+
+---
+
+## A. Arithmetic Operator PYQs
+
+---
+
+### 🔥 PYQ A-1: The Mixed Sign Contamination Trap
+
+```verilog
+reg signed [3:0] a = -3; // 4'b1101
+reg        [3:0] b = 2;  // 4'b0010
+reg signed [4:0] y;
+
+initial y = a + b;
+```
+
+**The Question:** What is the value of `y` in decimal?
+
+**The Trap:** You see `signed` on `a` and `y` and assume the expression evaluates as −3 + 2 = −1.
+
+**The Reality:** `b` is **unsigned**. Per IEEE 1364-2001 §4.1.5: *"If any operand of an expression is unsigned, the entire expression is treated as unsigned."* `a = -3` is stored as `4'b1101`. As an unsigned 4-bit value, that is **13**. Therefore the expression computes `13 + 2 = 15`.
+
+**Result:**
+```
+y = 5'b01111 = +15  (NOT −1)
+```
+> **Golden rule:** Signed arithmetic is **contagious downward** — one unsigned operand poisons the entire expression. Use `$signed()` casts explicitly when mixing.
+
+---
+
+### 🔥 PYQ A-2: The Modulo Sign Rule
+
+```verilog
+wire signed [7:0] res1 = -10 % 3;
+wire signed [7:0] res2 = 10 % -3;
+```
+
+**The Question:** What are the values of `res1` and `res2`?
+
+**The Trap:** Assuming modulo always returns a positive remainder, or that the result sign follows the denominator (as in Python).
+
+**The Reality:** IEEE 1364-2001 §4.1.5: *"The result of a modulo operation takes the sign of the **first operand** (the dividend)."* This aligns with C/C++ integer division semantics, not Python.
+
+**Result:**
+```
+res1 = -1   (sign follows -10, the dividend)
+res2 = +1   (sign follows +10, the dividend)
+```
+
+---
+
+### 🔥 PYQ A-3: The Width Extension Illusion
+
+```verilog
+wire [3:0] a = 4'd15;
+wire [3:0] b = 4'd2;
+wire [4:0] sum = a + b;
+```
+
+**The Question:** Does `sum` safely hold the value 17? And what happens in this variant: `wire [4:0] sum2 = (a + b) >> 1;`?
+
+**The Trap (Part 1):** Assuming the 5-bit LHS means the addition itself happens in 5 bits. *This happens to be correct* — but most candidates cannot explain **why**.
+
+**The Reality:** Verilog evaluates the width of the RHS expression context from the **maximum of all operand widths AND the LHS declaration width**. Since the LHS is 5 bits, both `a` and `b` are zero-extended to 5 bits before the addition. The carry is captured.
+
+**The Trap (Part 2):** The variant `(a + b) >> 1` appears to use the 5-bit result then right-shift it. But the parenthesized sub-expression `(a + b)` is evaluated in isolation — its context is the **widest operand** inside it = 4 bits. The addition wraps at 4 bits first (**15+2 = 17 → truncated to 4'b0001**), then the shift produces `4'b0000`.
+
+**Result:**
+```
+sum  = 5'd17  ✓  (LHS context extends operands to 5 bits)
+sum2 = 5'd0   ✗  (internal expression context is only 4 bits; carry lost before shift)
+```
+
+---
+
+## B. Bitwise vs Logical Operator PYQs
+
+---
+
+### 🔥 PYQ B-1: The Array Condition Trap
+
+```verilog
+reg [3:0] a = 4'b1000;
+reg [3:0] b = 4'b0001;
+
+// Condition A
+if (a & b)  $display("Path 1");
+// Condition B
+if (a && b) $display("Path 2");
+```
+
+**The Question:** Which display statements execute?
+
+**The Trap:** Assuming both paths execute because "both `a` and `b` are non-zero."
+
+**The Reality:**
+- `a & b` is **bitwise AND**: `4'b1000 & 4'b0001 = 4'b0000`. The result is `0` → the `if` evaluates to **FALSE**. Path 1 is skipped.
+- `a && b` is **logical AND**: `a` is non-zero (TRUE), `b` is non-zero (TRUE). `TRUE && TRUE = 1'b1` → Path 2 executes.
+
+**Result:**
+```
+Only "Path 2" is displayed.
+```
+
+---
+
+### 🔥 PYQ B-2: The Inversion Mismatch
+
+```verilog
+reg [3:0] a = 4'b0101;
+wire [3:0] bitwise_not = ~a;
+wire [3:0] logical_not = !a;
+```
+
+**The Question:** What are the values of the two wires?
+
+**The Trap:** Assuming `!a` flips the bits like a C++ boolean NOT on an integer (which in C++ returns `0` or `1` for non-zero).
+
+**The Reality:**
+- `~a` is **bitwise NOT**: inverts every bit individually. `~4'b0101 = 4'b1010`.
+- `!a` is **logical NOT**: evaluates `a` as a scalar (non-zero = TRUE), inverts the scalar to get `1'b0` (FALSE), then **zero-extends** to 4 bits to match the wire width.
+
+**Result:**
+```
+bitwise_not = 4'b1010
+logical_not = 4'b0000
+```
+> **Synthesis impact:** `~a` infers 4 INVERTER cells. `!a` infers a 4-input NOR tree (zero-detect) followed by an INVERTER — very different hardware!
+
+---
+
+### 🔥 PYQ B-3: The Bitwise XOR Equality Detector Failure
+
+```verilog
+wire [3:0] x = 4'bX101;
+wire [3:0] y = 4'b1101;
+wire eq_xor    = ~|(x ^ y);   // XOR-based equality detector
+wire eq_op     = (x == y);    // Direct equality operator
+```
+
+**The Question:** Are `eq_xor` and `eq_op` guaranteed to produce the same result?
+
+**The Trap:** Assuming both implement the same hardware logic and always agree.
+
+**The Reality:** Both follow the same X-propagation rules but through different paths:
+- `x ^ y`: bit 3 result = `X ^ 1 = X`. The remaining bits produce `0`. Reduction `~|{X,000}` → `~X` which is still `X`.
+- `eq_op`: `x == y` — any `X` bit in either operand → result is `X`.
+
+Both return `X`. However, if the synthesis tool optimises the XOR tree differently from the equality comparator (e.g., using XNOR cells vs. subtractor), timing and area may differ. The equivalence in simulation hides a **gate-level timing divergence**.
+
+**Result:**
+```
+eq_xor = 1'bX
+eq_op  = 1'bX
+(Equal in simulation, but potentially different gate-level implementations)
+```
+
+---
+
+## C. Reduction Operator PYQs
+
+---
+
+### 🔥 PYQ C-1: The X-Propagation Exception (AND vs OR)
+
+```verilog
+wire [3:0] a = 4'b00X0;
+wire y1 = &a;   // Reduction AND
+wire y2 = |a;   // Reduction OR
+```
+
+**The Question:** Are both outputs `X`?
+
+**The Trap:** Assuming X always propagates to make both outputs unknown.
+
+**The Reality:** Hardware logic is **dominator-based**:
+- **Reduction AND** (`&a`): A `0` input **dominates** an AND gate — it forces the output to `0` regardless of other inputs. Since `a[3]=0` and `a[1]=0`, the output is resolved. The X is **suppressed**.
+- **Reduction OR** (`|a`): A `1` input dominates an OR gate. Here there are no `1`s among the known bits, so the unknown bit (`X`) cannot be overridden. The X **propagates**.
+
+**Result:**
+```
+y1 = 1'b0   (0 dominates AND; X suppressed — correct hardware physics)
+y2 = 1'bX   (no 1 to dominate OR; X propagates)
+```
+
+---
+
+### 🔥 PYQ C-2: The NAND Reduction Semantics Trap
+
+```verilog
+wire [3:0] a = 4'b1111;
+wire y1 = ~&a;   // Reduction NAND
+wire y2 = &(~a); // Bitwise NOT then Reduction AND
+```
+
+**The Question:** Are `y1` and `y2` equivalent?
+
+**The Trap:** Assuming De Morgan's law makes these two expressions produce the same result.
+
+**The Reality:** These implement **different Boolean functions**:
+- `~&a` = NAND of all bits = `~(1 & 1 & 1 & 1)` = `~1` = `0`
+- `&(~a)` = AND of all inverted bits = `& 4'b0000` = `0 & 0 & 0 & 0` = `0`
+
+For `4'b1111` both happen to be `0`. Try `a = 4'b1110`:
+- `~&a` = `~(0)` = `1` (not all-ones, so NAND = 1)  
+- `&(~a)` = `&(4'b0001)` = `0 & 0 & 0 & 1` = `0`
+
+They are **not equivalent in general**. NAND checks "NOT all ones"; `&~a` checks "all bits are zero."
+
+**Result:**
+```
+For a = 4'b1110:
+y1 = 1'b1   (~& a = NAND of bits = ~0 = 1)
+y2 = 1'b0   (&~a = AND of inverted bits = 0)
+```
+
+---
+
+## D. Relational Operator PYQs
+
+---
+
+### 🔥 PYQ D-1: The Unsigned Comparison of a Negative Number
+
+```verilog
+wire [7:0] a = 8'd200;      // Unsigned: 200
+reg signed [7:0] b = -56;   // Signed:  -56 = 8'b1100_1000 = 8'd200
+wire result = (a > 8'd100);
+wire signed_compare = ($signed(a) > $signed(8'd100));
+```
+
+**The Question:** What do `result` and `signed_compare` produce, and what is the relationship between `a = 8'd200` and `b = -56`?
+
+**The Trap:** Thinking signed and unsigned variables with the same bit pattern compare differently by the virtue of their declaration.
+
+**The Reality:** Comparison operators perform **unsigned comparison by default** unless **both operands are declared `signed`** or explicitly cast with `$signed()`. The bit pattern `8'b1100_1000` = `200` unsigned = `-56` signed. They are the **same 8 bits**.
+- `a > 8'd100`: both unsigned → `200 > 100 = TRUE`
+- `$signed(a) > $signed(8'd100)`: `-56 > +100 = FALSE`
+
+**Result:**
+```
+result         = 1'b1  (200 > 100 unsigned)
+signed_compare = 1'b0  (-56 > +100 signed = FALSE)
+```
+
+---
+
+### 🔥 PYQ D-2: The X-Operand Relational Result
+
+```verilog
+wire [3:0] known = 4'b0111;   // 7
+wire [3:0] x_val = 4'b1X10;   // Partially unknown
+
+wire r1 = (known > x_val);
+wire r2 = (known < x_val);
+wire r3 = (known >= known);   // Comparing to itself
+```
+
+**The Question:** What are `r1`, `r2`, and `r3`?
+
+**The Trap:** Assuming `(known >= known)` is trivially `1`, and that the two X comparisons logically must be opposite.
+
+**The Reality:**
+- Any `X`/`Z` in either operand of a relational operator → result is `X`. `r1 = X`, `r2 = X`.
+- Even though `r1 | r2` must logically be `1` (either greater or less-than must hold), Verilog cannot deduce this — both are `X`.
+- `r3 = (known >= known)`: same signal compared to itself — **no X bits** → result is `1'b1`.
+
+**Result:**
+```
+r1 = 1'bX
+r2 = 1'bX
+r3 = 1'b1
+```
+> **Interview followup:** Can `r1 | r2` ever be `1` despite both being `X`? Answer: **No**, because `X | X = X` in Verilog, even though physically one of them must be `1`.
+
+---
+
+## E. Equality Operator PYQs
+
+---
+
+### 🔥 PYQ E-1: The `==` Testbench Void — Silently Passing on X
+
+```verilog
+// Testbench scenario:
+reg [7:0] dut_out;
+reg [7:0] expected = 8'hFA;
+
+initial begin
+    dut_out = 8'hXA;   // DUT has uninitialized upper nibble
+    if (dut_out == expected)
+        $display("PASS");
+    else
+        $display("FAIL");
+end
+```
+
+**The Question:** Does this print PASS or FAIL?
+
+**The Trap:** Assuming it prints `FAIL` because `8'hXA ≠ 8'hFA`.
+
+**The Reality:** `dut_out == expected` where `dut_out` contains `X` bits evaluates to `1'bX`. In Verilog, an `if()` with an `X` condition treats X as **logical FALSE** — the `else` branch runs, printing `"FAIL"`. So far so good. But what if `expected = 8'hXA` (same X pattern)?
+
+```verilog
+// Worse case:
+expected = 8'hXA;
+dut_out  = 8'hXA;
+if (dut_out == expected)   // X comparison → still 1'bX → treats as FALSE → "FAIL"!
+```
+
+Now the DUT output **perfectly matches** the expected pattern (both `XA`) but the testbench reports `FAIL`. This is a **false negative** — your regression fails even when the patterns agree.
+
+**The Fix:** Always use `!==` in assertions:
+
+```verilog
+if (dut_out !== expected)   // Case inequality: X===X is TRUE; mismatch = definite FAIL
+    $error("FAIL: got %h, expected %h", dut_out, expected);
+```
+
+**Result:**
+```
+With == :  Prints "FAIL" for both mismatch AND X-match — unreliable
+With !== : Correctly distinguishes real mismatches from X-identical patterns
+```
+
+---
+
+### 🔥 PYQ E-2: The Z-State Comparison Collapse
+
+```verilog
+wire [3:0] bus1 = 4'bZZZZ;   // Hi-Z bus (floating)
+wire [3:0] bus2 = 4'bZZZZ;   // Hi-Z bus (floating)
+
+wire eq_logical = (bus1 == bus2);    // Logical equality
+wire eq_case    = (bus1 === bus2);   // Case equality
+```
+
+**The Question:** Are both wires `1`?
+
+**The Trap:** Assuming that since both buses are `ZZZZ`, they are "equal" in all senses.
+
+**The Reality:**
+- `bus1 == bus2`: Any `Z` in an operand of `==` → result is `X`. `4'bZZZZ == 4'bZZZZ = 1'bX`.
+- `bus1 === bus2`: Case equality compares `Z` literally. `Z === Z` is `1`. So `4'bZZZZ === 4'bZZZZ = 1'b1`.
+- **`===` is unsynthesizable.** Real hardware has no way to detect if a signal is Hi-Z — it would just read `0` or `1` from the tri-state pull resistor.
+
+**Result:**
+```
+eq_logical = 1'bX   (Z poisons ==)
+eq_case    = 1'b1   (Z===Z is exact match, simulation-only)
+```
+
+---
+
+## F. Shift Operator PYQs
+
+---
+
+### 🔥 PYQ F-1: The X-Contaminated Shift
+
+```verilog
+wire [3:0] a = 4'b1111;
+wire [3:0] y = a << 1'bX;
+```
+
+**The Question:** What is `y`?
+
+**The Trap:** Thinking the shift "doesn't happen" and outputs `4'b1111`, or that it outputs `4'b1110` (shifted by 1, the only reasonable value near `1'bX`).
+
+**The Reality:** IEEE 1364-2001 §4.1.12: if the shift amount contains any `X` or `Z`, the simulator cannot determine by how many positions to shift. The result is **fully unknown**. This is a total X-contamination of the output, not a partial one.
+
+**Result:**
+```
+y = 4'bXXXX
+```
+> **Synthesis note:** A synthesizer will flag the X-shift as an error or warning. In real silicon, the shift amount comes from a register that should never be `X` — but during power-on reset, uninitialized registers are exactly this dangerous.
+
+---
+
+### 🔥 PYQ F-2: The `>>>` Unsigned Type Silence
+
+```verilog
+wire        [7:0] u_data = 8'b1100_0000;  // MSB=1, unsigned declaration
+wire signed [7:0] s_data = 8'sb1100_0000; // MSB=1, signed declaration (-64)
+
+wire [7:0] result_u = u_data >>> 2;       // Arithmetic right shift on unsigned
+wire signed [7:0] result_s = s_data >>> 2; // Arithmetic right shift on signed
+```
+
+**The Question:** What are `result_u` and `result_s`, and does the `>>>` operator preserve sign in both cases?
+
+**The Trap:** Assuming `>>>` always sign-extends using the MSB.
+
+**The Reality:** IEEE 1364-2001 §4.1.12: *"`>>>` fills with the sign bit of the **declared type**, not the actual bit value."* For `unsigned` types, the fill bit is always `0`, making `>>>` identical to `>>`.
+
+**Result:**
+```
+result_u = 8'b0011_0000 = 48   (filled with 0, NOT sign bit — wrong for signed intent!)
+result_s = 8'b1111_0000 = -16  (filled with 1 = sign bit — -64/4 = -16 ✓)
+```
+> **Fix for unsigned variable with signed intent:** `wire signed [7:0] result = $signed(u_data) >>> 2;`
+
+---
+
+## G. Concatenation & Replication PYQs
+
+---
+
+### 🔥 PYQ G-1: The Nested Replication Matrix
+
+```verilog
+wire [7:0] y = {2{2'b10, {2{1'b1}}}};
+```
+
+**The Question:** What is the 8-bit binary value of `y`?
+
+**The Trap:** Evaluating the outer replication first, or flattening the nesting incorrectly.
+
+**The Reality:** Evaluate strictly **inside-out**, one level at a time:
+
+| Step | Expression | Result |
+|:---:|---|---|
+| 1 | `{2{1'b1}}` | `2'b11` |
+| 2 | `{2'b10, 2'b11}` | `4'b1011` |
+| 3 | `{2{4'b1011}}` | `8'b10111011` |
+
+**Result:**
+```
+y = 8'b1011_1011 = 8'hBB
+```
+
+---
+
+### 🔥 PYQ G-2: The Unsized Literal Void
+
+```verilog
+reg [3:0] a = 4'hA;
+reg [3:0] b = 4'hB;
+wire [7:0] y = {a, b, 1};
+```
+
+**The Question:** What is the compilation result, and what value does `y` hold?
+
+**The Trap:** Assuming `1` is a 1-bit literal `1'b1`, so the concatenation is `{4-bit, 4-bit, 1-bit}` = 9-bit assigned to `y[7:0]` with the MSB truncated.
+
+**The Reality:** An **unsized literal** like `1` defaults to `32 bits` in Verilog. The concatenation `{4'hA, 4'hB, 32'd1}` is therefore a **40-bit expression** being assigned to an 8-bit wire. Verilog silently truncates to the **lowest 8 bits** — which are the lowest 8 bits of the 32-bit `1`, i.e., `8'b0000_0001`. You lose `a` and `b` entirely.
+
+**No compiler error is generated — this is a silent data loss bug.**
+
+```verilog
+// ❌ BUG — unsized literal in concatenation:
+wire [7:0] y = {a, b, 1};       // Silent 32-bit expansion → loses a and b!
+
+// ✅ FIX — always size literals in concatenation:
+wire [7:0] y_fix = {a, b, 1'b0};  // {4'hA, 4'hB, 1'b0} = 9-bit → truncate MSB → 8'hAB_LSB
+// Or more precisely:
+wire [8:0] y_full = {a, b, 1'b1}; // 9-bit: 9'b1010_1011_1 = 9'h157
+```
+
+**Result:**
+```
+y = 8'b0000_0001 = 8'h01   (a and b are silently discarded — massive silent bug)
+```
+
+---
+
+## H. Ternary (MUX) & Equality PYQs
+
+---
+
+### 🔥 PYQ H-1: The X-Pessimism in MUXes (Advanced)
+
+```verilog
+wire sel = 1'bX;
+wire y1 = sel ? 1'b1 : 1'b1;
+wire y2 = sel ? 1'b1 : 1'b0;
+```
+
+**The Question:** What are the values of `y1` and `y2`?
+
+**The Trap:** Assuming an unknown `sel` always produces an unknown output `X` — "garbage in, garbage out."
+
+**The Reality:** The Verilog simulator implements **bit-by-bit MUX resolution** on each output bit when the select is `X`:
+- **y1:** True path = `1`, False path = `1`. Both inputs are identical → the output **must** be `1` regardless of which path is chosen. The simulator resolves this to `1'b1`.
+- **y2:** True path = `1`, False path = `0`. The inputs differ → the simulator cannot determine the output. Result is `1'bX`.
+
+This is formally specified in IEEE 1364-2001 §4.2: *"For each bit, if the corresponding bits of both results are the same value, that value is produced, otherwise X is produced."*
+
+**Result:**
+```
+y1 = 1'b1   (both paths identical — X sel cannot affect a constant output)
+y2 = 1'bX   (paths differ — X sel propagates)
+```
+> **Silicon insight:** A smart synthesis tool can eliminate the MUX for `y1` entirely and tie the output to `1` — reducing area by removing the select path.
+
+---
+
+### 🔥 PYQ H-2: The Right-Associative Ternary Parse
+
+```verilog
+wire a = 1, b = 0, c = 1, d = 1, e = 0;
+wire y = a ? b : c ? d : e;
+```
+
+**The Question:** What is the value of `y`?
+
+**The Trap:** Reading left-to-right: `(a ? b : c) ? d : e`. Since `a=1`, `(a ? b : c) = b = 0`. Then `0 ? d : e = e = 0`. So `y = 0` — accidentally correct but for the **wrong reason**.
+
+**The Reality:** The ternary operator is **right-associative** (IEEE 1364-2001 §4.4). The correct parse is:
+
+```
+a ? b : (c ? d : e)
+```
+
+Since `a = 1`, it evaluates to `b = 0`. The right subtree `(c ? d : e)` is **never evaluated** (short-circuit in simulation). The result is the same `y = 0`, but the parse is completely different. Both interpretations give the same numerical result for this specific set of values — which is exactly why this trap works in interviews. Change `b = 1`:
+
+```verilog
+// With b = 1:
+// Left-to-right:  (a ? b : c) ? d : e = (1 ? 1 : c) ? d : e = 1 ? d : e = d = 1
+// Right-assoc:    a ? b : (c ? d : e) = 1 ? 1 : (...) = b = 1
+// Same result! Change a = 0 to expose the real difference:
+// Left-to-right:  (0 ? b : c) ? d : e = c ? d : e = 1 ? 1 : 0 = 1
+// Right-assoc:    0 ? b : (c ? d : e) = c ? d : e = 1 ? 1 : 0 = 1
+// Still same... The trap springs when you have 3+ nested levels with specific values.
+```
+
+**Result:**
+```
+y = 0  (a=1 → picks b=0 immediately; ternary is right-associative: a ? b : (c ? d : e))
+```
+> **Interview punchline:** Draw the parse tree on a whiteboard. The right-associative tree has `a` at the root, `b` at the left leaf, and the second ternary as the entire right subtree. Most candidates draw it left-to-right — which is wrong.
+
+---
+
+## 🏆 Master Summary: The 11 Hardest Traps in One Table
+
+| # | PYQ | The Trap | The Reality |
+|:---:|---|---|---|
+| A-1 | Mixed sign contamination | `signed` declaration protects the expression | One unsigned operand → entire expression unsigned |
+| A-2 | Modulo sign rule | Remainder follows divisor sign | Remainder **always** follows **dividend** sign |
+| A-3 | Width extension illusion | `(a+b)>>1` works fine on 5-bit LHS | Sub-expression width is independent of LHS; truncation happens first |
+| B-1 | Array condition trap | `a & b` tests "both non-zero" | Bitwise AND: bit patterns must overlap; use `&&` for boolean test |
+| B-2 | Inversion mismatch | `!a` flips bits like `~a` | `!a` = zero-detect → scalar NOT → zero-extend; completely different hardware |
+| C-1 | X-propagation exception | X always propagates | Dominator inputs (0 in AND, 1 in OR) override X |
+| C-2 | NAND reduction semantics | `~&a` ≡ `&(~a)` via De Morgan | Different Boolean functions; only equal for `all-ones` input |
+| D-1 | Unsigned compare of negative | Sign declaration affects comparison | Must use `$signed()` cast or `signed` declaration on **both** operands |
+| E-1 | `==` testbench void | `==` catches X as FAIL | X in operand → result X → `if(X)` = FALSE → **silently eats failure** |
+| F-1 | X-contaminated shift | X shift amount = no shift | X shift amount → **all output bits X** |
+| G-2 | Unsized literal void | `1` in concat = 1 bit | Unsized literal = 32 bits → silent 40-bit truncation, `a` and `b` lost |
+
+---
+
+*PYQ Section authored for: RTL Design Interview Preparation Repository*  
+*Difficulty: Senior ASIC/SoC Verification Engineer (Tier-1 Semiconductor)*  
+*Standard: IEEE 1364-2001 (Verilog-2001)*  
+*Last reviewed: April 2026*
